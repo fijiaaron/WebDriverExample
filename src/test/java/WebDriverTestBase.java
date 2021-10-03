@@ -1,13 +1,18 @@
 import org.junit.After;
 import org.junit.Before;
+import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.safari.SafariDriver;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -39,23 +44,25 @@ public class WebDriverTestBase
 		}
 	}
 
-	public Properties loadProperties(String s) throws IOException
+	public Properties loadProperties(String propertiesFile) throws IOException
 	{
 		Properties properties = new Properties();
-		InputStream propsFile = this.getClass().getResourceAsStream("test.properties");
+		InputStream propsFile = this.getClass().getResourceAsStream(propertiesFile);
 		try {
 			properties.load(propsFile);
 		}
 		catch (IOException e)
 		{
-			System.out.println("Warning: could not load properties from file");
+			log.warning("Could not load properties from file: " + propertiesFile);
 		}
 
 		return properties;
 	}
 
-	public String getBrowser()
+	public String getBrowser() throws MalformedURLException
 	{
+
+
 		String DEFAULT_BROWSER = browser;
 
 		String BROWSER_FROM_SYSTEM_PROPERTIES = System.getProperty("BROWSER");
@@ -66,6 +73,10 @@ public class WebDriverTestBase
 
 		String BROWSER_FROM_PROPERTIES_FILE = properties.getProperty("BROWSER");
 		log.info("BROWSER_FROM_PROPERTIES_FILE: " + BROWSER_FROM_PROPERTIES_FILE);
+
+		if (BROWSER_FROM_SYSTEM_PROPERTIES != null) return BROWSER_FROM_SYSTEM_PROPERTIES;
+		if (BROWSER_FROM_ENVIRONMENT_VARIABLE != null) return BROWSER_FROM_ENVIRONMENT_VARIABLE;
+		if (BROWSER_FROM_PROPERTIES_FILE != null) return BROWSER_FROM_PROPERTIES_FILE;
 
 		// order of preference for choosing browser
 		List<String> POTENTIAL_BROWSERS = Arrays.asList(
